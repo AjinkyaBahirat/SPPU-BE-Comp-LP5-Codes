@@ -72,34 +72,6 @@ void BFS(Graph* graph, int startNode) {
     }
 }
 
-
-void DFSUtil(Graph* graph, int currentNode, bool visited[]) {
-    visited[currentNode] = true;
-    printf("%d ", currentNode);
-
-    #pragma omp parallel
-    {
-        #pragma omp single nowait
-        {
-            Node* neighbor = graph->adjacencyList[currentNode];
-            
-            while (neighbor != NULL) {
-                int nextNode = neighbor->data;
-                if (!visited[nextNode]) {
-                    #pragma omp task
-                    DFSUtil(graph, nextNode, visited);
-                }
-                neighbor = neighbor->next;
-            }
-        }
-    }
-}
-
-void DFS(Graph* graph, int startNode) {
-    bool visited[MAX_NODES] = { false };
-    DFSUtil(graph, startNode, visited);
-}
-
 int main() {
     Graph graph;
     graph.numNodes = 7;
@@ -117,8 +89,6 @@ int main() {
 
     printf("Parallel BFS: \n");
     BFS(&graph, 0);
-    //printf("\n\nParallel DFS: \n");
-    //DFS(&graph, 0);
 
     return 0;
 }

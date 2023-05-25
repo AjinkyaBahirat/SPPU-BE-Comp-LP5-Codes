@@ -28,50 +28,6 @@ void addEdge(Graph* graph, int src, int dest) {
     graph->adjacencyList[src] = newNode;
 }
 
-void BFS(Graph* graph, int startNode) {
-    bool visited[MAX_NODES] = { false };
-
-    visited[startNode] = true;
-    printf("BFS traversal: %d ", startNode);
-
-    #pragma omp parallel
-    {
-        #pragma omp single nowait
-        {
-            Node* queue = createNode(startNode);
-            
-            while (queue != NULL) {
-                #pragma omp task
-                {
-                    int currentNode = queue->data;
-                    Node* neighbor = graph->adjacencyList[currentNode];
-                    
-                    while (neighbor != NULL) {
-                        int nextNode = neighbor->data;
-                        if (!visited[nextNode]) {
-                            #pragma omp critical
-                            {
-                                visited[nextNode] = true;
-                                printf("%d ", nextNode);
-                            }
-                            #pragma omp task
-                            {
-                                Node* newNode = createNode(nextNode);
-                                newNode->next = queue->next;
-                                queue->next = newNode;
-                            }
-                        }
-                        neighbor = neighbor->next;
-                    }
-                }
-                Node* temp = queue;
-                queue = queue->next;
-                free(temp);
-            }
-        }
-    }
-}
-
 
 void DFSUtil(Graph* graph, int currentNode, bool visited[]) {
     visited[currentNode] = true;
@@ -115,10 +71,8 @@ int main() {
     addEdge(&graph, 2, 5);
     addEdge(&graph, 2, 6);
 
-    printf("Parallel BFS: \n");
-    BFS(&graph, 0);
-    //printf("\n\nParallel DFS: \n");
-    //DFS(&graph, 0);
+    printf("Parallel DFS: \n");
+    DFS(&graph, 0);
 
     return 0;
 }
